@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hypertension Treatment System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2b7a78;
+            --secondary: #3aafa9;
+            --light: #feffff;
+            --dark: #17252a;
+            --alert: #ff6b6b;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background: #f8f9fa;
+            color: var(--dark);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: var(--light);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1, h2, h3 {
+            color: var(--primary);
+            margin-top: 0;
+        }
+
+        h1 {
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 0.5rem;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            border-color: var(--secondary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(58,175,169,0.2);
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            background: var(--secondary);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .alert-box {
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .medication-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .btn-group {
+            margin-top: 1.5rem;
+        }
+
+        #loading {
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--primary);
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Unit Input Styling (reusable for all unit-based inputs) */
+        .unit-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .unit-input-container input {
+            flex: 1;  /* Input takes priority space */
+            min-width: 60%; /* Minimum width guarantee */
+            padding: 0.75rem; /* Matches your design */
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .unit-input-container select {
+            width: 120px;   /* Fixed width for dropdown */
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .logo-img {
+            height: 150px;
+            width: auto;
+            max-width: none;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>  
+    <div class="container">
+        <div class="header-row">
+            <h1>Hypertension Treatment System</h1>
+            <img src="{{ url_for('static', filename='LenAIro_logo.jpg') }}" alt="Logo" class="logo-img">
+        </div>
+
+        <div class="section">
+            <h2>Patient Information</h2>
+            <form id="patient-form">
+                <div class="input-group">
+                    <label for="patient_id">Patient ID</label>
+                    <input type="text" id="patient_id" name="patient_id" required>
+                </div>
+      
+                <div class="input-group">
+                    <label for="Age">Age</label>
+                    <input type="number" id="Age" name="Age" step="0.1" min="18" max="120" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="Glucose">Glucose</label>
+                    <div class="unit-input-container">
+                        <input type="number" id="Glucose" name="Glucose" step="0.01" min="0" required>
+                        <select id="Glucose_unit" name="Glucose_unit" required>
+                            <option value="mmol">mmol/L</option>
+                            <option value="mg">mg/dL</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="Pulse">Pulse (bpm)</label>
+                    <input type="number" id="Pulse" name="Pulse" step="1" min="30" max="200" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="Systolic_BP">Systolic BP (mmHg)</label>
+                    <input type="number" id="Systolic_BP" name="Systolic_BP" step="1" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="Diastolic_BP">Diastolic BP (mmHg)</label>
+                    <input type="number" id="Diastolic_BP" name="Diastolic_BP" step="1" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="BMI">BMI</label>
+                    <input type="number" id="BMI" name="BMI" step="0.1" min="10" max="60" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="Creatinine_mg_dl">Creatinine</label>
+                    <div class="unit-input-container">
+                        <input type="number" id="Creatinine_mg_dl" name="Creatinine_mg_dl" step="0.01" min="0" required>
+                        <select id="Creatinine_unit" name="Creatinine_unit" required>
+                            <option value="umol">µmol/L</option>
+                            <option value="mg">mg/dL</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="country">Country</label>
+                    <input type="text" id="country" name="country" required>
+                </div>
+                
+                <h3>Current Medications</h3>
+                <div class="input-group">
+                    <label for="Medication1_Name">Medication 1</label>
+                    <input type="text" id="Medication1_Name" name="Medication1_Name" value="unknown">
+                </div>
+                
+                <div class="input-group">
+                    <label for="Medication2_Name">Medication 2</label>
+                    <input type="text" id="Medication2_Name" name="Medication2_Name" value="unknown">
+                </div>
+                
+                <div class="input-group">
+                    <label for="Medication3_Name">Medication 3</label>
+                    <input type="text" id="Medication3_Name" name="Medication3_Name" value="unknown">
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" class="btn">Get Treatment Recommendation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+        <div id="loading" class="hidden">
+            <div class="spinner"></div>
+            <p>Analyzing patient data...</p>
+        </div>
+        
+        <div id="prediction-results" class="section hidden">
+            <h2>Treatment Recommendation</h2>
+            <div id="prediction-details"></div>
+            <div id="prediction-error" class="alert-box error hidden"></div>
+            
+            <div class="btn-group">
+                <button id="accept-btn" class="btn">Accept Recommendation</button>
+                <button id="reject-btn" class="btn btn-secondary">Reject and Correct</button>
+                <input type="hidden" name="accept_prescription" id="accept_prescription" value="false">
+            </div>
+        </div>
+        
+        <div id="correction-fields" class="section hidden">
+            <h2>Prescription Correction</h2>
+            <div id="correction-error" class="alert-box error hidden"></div>
+            
+            <input type="hidden" id="correction-id" name="id">
+            <input type="hidden" id="correction-patient-id" name="patient_id">
+            
+            <div class="medication-card">
+                <h3>Primary Medication</h3>
+                <div class="input-group">
+                    <label for="corrected_drug_class">Drug Class</label>
+                    <input type="text" id="corrected_drug_class" name="corrected_drug_class" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="corrected_medication_name">Medication Name</label>
+                    <input type="text" id="corrected_medication_name" name="corrected_medication_name" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="corrected_dose_value">Dose Value</label>
+                    <input type="number" id="corrected_dose_value" name="corrected_dose_value" step="0.1" required>
+                </div>
+            </div>
+            
+            <div class="medication-card">
+                <h3>Secondary Medication (Optional)</h3>
+                <div class="input-group">
+                    <label for="corrected_drug_class2">Drug Class</label>
+                    <input type="text" id="corrected_drug_class2" name="corrected_drug_class2">
+                </div>
+                
+                <div class="input-group">
+                    <label for="corrected_medication2">Medication Name</label>
+                    <input type="text" id="corrected_medication2" name="corrected_medication2">
+                </div>
+                
+                <div class="input-group">
+                    <label for="corrected_dose_value2">Dose Value</label>
+                    <input type="number" id="corrected_dose_value2" name="corrected_dose_value2" step="0.1">
+                </div>
+            </div>
+            
+            <div class="medication-card">
+                <h3>Tertiary Medication (Optional)</h3>
+                <div class="input-group">
+                    <label for="corrected_drug_class3">Drug Class</label>
+                    <input type="text" id="corrected_drug_class3" name="corrected_drug_class3">
+                </div>
+                
+                <div class="input-group">
+                    <label for="corrected_medication3">Medication Name</label>
+                    <input type="text" id="corrected_medication3" name="corrected_medication3">
+                </div>
+                
+                <div class="input-group">
+                    <label for="corrected_dose_value3">Dose Value</label>
+                    <input type="number" id="corrected_dose_value3" name="corrected_dose_value3" step="0.1">
+                </div>
+            </div>
+            
+            <div class="btn-group">
+                <button id="submit-correction" class="btn">Submit Correction</button>
+                <button id="cancel-correction" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+            // Capture token from URL and persist in localStorage
+            const tokenFromUrl = new URLSearchParams(window.location.search).get("access");
+            if (tokenFromUrl) {
+            console.log("Token found in URL:", tokenFromUrl);
+            localStorage.setItem("access_token", tokenFromUrl);
+            }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const patientForm = document.getElementById('patient-form');
+            const loadingDiv = document.getElementById('loading');
+            const predictionResults = document.getElementById('prediction-results');
+            const correctionFields = document.getElementById('correction-fields');
+            const predictionDetails = document.getElementById('prediction-details');
+            const predictionError = document.getElementById('prediction-error');
+            const correctionError = document.getElementById('correction-error');
+            
+            // Store record ID when prediction is made
+            let currentRecordId = null;
+
+            patientForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            loadingDiv.classList.remove('hidden');
+            predictionResults.classList.add('hidden');
+            correctionFields.classList.add('hidden');
+            predictionError.classList.add('hidden');
+            
+            const formData = new FormData(patientForm);
+            const patientData = Object.fromEntries(formData.entries());
+            patientData["submitted_by_token"] = localStorage.getItem("access_token");
+            console.log("Final submitted token:", patientData["submitted_by_token"]);
+
+            // Convert numeric fields
+            const numericFields = ['Age', 'Glucose', 'Systolic_BP', 'Diastolic_BP', 
+                                'BMI', 'Pulse', 'Creatinine_mg_dl'];
+            numericFields.forEach(field => {
+                patientData[field] = field.includes('_BP') || field === 'Pulse' 
+                    ? parseInt(patientData[field])
+                    : parseFloat(patientData[field]);
+            });
+            
+            try {
+                const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
+                const response = await fetch(`${baseUrl}/api/predict`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(patientData)
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Prediction failed');
+                }
+                
+                const data = await response.json();
+                displayPrediction(data);
+                
+                if (data.id) {
+                    currentRecordId = data.id;
+                    document.getElementById('correction-id').value = data.id;
+                    document.getElementById('correction-patient-id').value = patientData.patient_id;
+                }
+                
+            } catch (error) {
+                predictionError.textContent = `Error: ${error.message}`;
+                predictionError.classList.remove('hidden');
+            } finally {
+                loadingDiv.classList.add('hidden');
+                predictionResults.classList.remove('hidden');
+            }
+        });
+            
+            
+            function displayPrediction(data) {
+                if (data.message && data.message.includes("No medication needed")) {
+                    predictionDetails.innerHTML = `
+                        <div class="alert-box success">
+                            <h3>${data.message}</h3>
+                            <p>Blood pressure is within normal range.</p>
+                        </div>
+                    `;
+                    document.getElementById('accept-btn').classList.add('hidden');
+                    document.getElementById('reject-btn').classList.add('hidden');
+                } else {
+                    predictionDetails.innerHTML = `
+                        <div class="medication-card">
+                            <h3>Recommended Treatment</h3>
+                            <p><strong>Drug Class:</strong> ${data.drug_class || 'Not specified'}</p>
+                            <p><strong>Medication:</strong> ${data.medication || 'Not specified'}</p>
+                            <p><strong>Dose:</strong> ${data.dose_value || 'Not specified'}</p>
+                            ${data.additional_recommendations ? `<p><strong>Notes:</strong> ${data.additional_recommendations}</p>` : ''}
+                        </div>
+                    `;
+                    document.getElementById('accept-btn').classList.remove('hidden');
+                    document.getElementById('reject-btn').classList.remove('hidden');
+                }
+            }
+            
+            document.getElementById('reject-btn').addEventListener('click', function() {
+                predictionResults.classList.add('hidden');
+                correctionFields.classList.remove('hidden');
+            });
+            
+            document.getElementById('cancel-correction').addEventListener('click', function() {
+                correctionFields.classList.add('hidden');
+                predictionResults.classList.remove('hidden');
+                correctionError.classList.add('hidden');
+            });
+            
+            document.getElementById('accept-btn').addEventListener('click', async function() {
+                document.getElementById('accept_prescription').value = 'true';
+                loadingDiv.classList.remove('hidden');
+                
+                try {
+                    const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
+                    const response = await fetch(`${baseUrl}/api/accept`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            id: currentRecordId,
+                            patient_id: document.getElementById('patient_id').value,
+                            accept_prescription: true
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.detail || 'Acceptance failed');
+                    }
+                    
+                    alert('Prescription accepted successfully!');
+                    location.reload();
+                    
+                } catch (error) {
+                    predictionError.textContent = `Error: ${error.message}`;
+                    predictionError.classList.remove('hidden');
+                } finally {
+                    loadingDiv.classList.add('hidden');
+                }
+            });
+            
+            document.getElementById('submit-correction').addEventListener('click', async function() {
+                correctionError.classList.add('hidden');
+                loadingDiv.classList.remove('hidden');
+                
+                // Validate ACEI+ARB contraindication
+                const drugClass1 = document.getElementById('corrected_drug_class').value.toUpperCase();
+                const drugClass2 = document.getElementById('corrected_drug_class2').value.toUpperCase();
+                const drugClass3 = document.getElementById('corrected_drug_class3').value.toUpperCase();
+                
+                const classes = [drugClass1, drugClass2, drugClass3].filter(c => c);
+                if (classes.includes("ACEI") && classes.includes("ARB")) {
+                    correctionError.textContent = "Error: ACEI+ARB combination is contraindicated and not permitted";
+                    correctionError.classList.remove('hidden');
+                    loadingDiv.classList.add('hidden');
+                    return;
+                }
+                
+                try {
+                    // Collecting drug information from form inputs
+                    const correctionData = {
+                        id: document.getElementById('correction-id').value,
+                        patient_id: document.getElementById('correction-patient-id').value,
+                        drugs: [
+                            {
+                                class: drugClass1,
+                                medication: document.getElementById('corrected_medication_name').value,
+                                dose: document.getElementById('corrected_dose_value').value
+                            },
+                            drugClass2 ? {
+                                class: drugClass2,
+                                medication: document.getElementById('corrected_medication2').value,
+                                dose: document.getElementById('corrected_dose_value2').value
+                            } : null,
+                            drugClass3 ? {
+                                class: drugClass3,
+                                medication: document.getElementById('corrected_medication3').value,
+                                dose: document.getElementById('corrected_dose_value3').value
+                            } : null
+                        ].filter(drug => drug !== null) // Remove any null items from the drugs array
+                    };
+
+                    // Log to help debug if necessary
+                    console.log("Submitting correction with ID:", correctionData.id);
+
+                    // Check if correction ID is missing
+                    if (!correctionData.id) {
+                        console.error("No correction ID found!");
+                        correctionError.textContent = "Error: Missing correction reference ID";
+                        correctionError.classList.remove('hidden');
+                        loadingDiv.classList.add('hidden');
+                        return;
+                    }
+
+                    // Sending the POST request
+                    const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
+                    const response = await fetch(`${baseUrl}/api/correct`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(correctionData)
+                    });
+
+                    // Handling the response from the server
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.detail || 'Correction failed');
+                    }
+
+                    alert('Correction submitted successfully!');
+                    location.reload();
+                    
+                } catch (error) {
+                    correctionError.textContent = `Error: ${error.message}`;
+                    correctionError.classList.remove('hidden'); 
+                } finally {
+                    loadingDiv.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
