@@ -36,10 +36,10 @@ logger = logging.getLogger(__name__)
 
 # API endpoints
 FASTAPI_BASE = {
-    "predict": os.environ.get("https://p01--prediction-api--dv9tcvlt6fzs.code.run/predict", "http://localhost:8000/predict"),
-    "accept": os.environ.get("https://p01--correction-api--dv9tcvlt6fzs.code.run/accept_prescription", "http://localhost:8001/accept_prescription"),
-    "correct_single": os.environ.get("https://p01--correction-api--dv9tcvlt6fzs.code.run/correct", "http://localhost:8001/correct"),
-    "correct_combo": os.environ.get("https://p01--correction-api--dv9tcvlt6fzs.code.run/api/correct_combo", "http://localhost:8001/api/correct_combo")
+    "predict": os.environ.get("PREDICTION_API_URL", "http://localhost:8000/predict"),
+    "accept": os.environ.get("CORRECTION_API_URL_ACCEPT", "http://localhost:8001/accept_prescription"),
+    "correct_single": os.environ.get("CORRECTION_API_URL_SINGLE", "http://localhost:8001/correct"),
+    "correct_combo": os.environ.get("CORRECTION_API_URL_COMBO", "http://localhost:8001/api/correct_combo")
 }
 
 # Required fields for prediction
